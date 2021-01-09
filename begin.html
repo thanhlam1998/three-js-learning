@@ -45,7 +45,6 @@
 
             renderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.shadowMapEnabled = true;
 
             // show axes in the screen
             var axis = new THREE.AxisHelper(20);
@@ -66,11 +65,10 @@
             scene.add(plane);
 
             var cubeGeometry = new THREE.BoxGeometry(4, 4, 4);
+            var cubeMaterial = new THREE.MeshLambertMaterial({color: 0x00ee22});
 
             for (var j = 0; j < (planeGeometry.parameters.height / 5); j++) {
                 for (var i = 0; i < planeGeometry.parameters.width / 5; i++) {
-                    var rnd = Math.random() * 0.75 + 0.25;
-                    var cubeMaterial = new THREE.MeshLambertMaterial();
                     var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
 
                     cube.position.z = -((planeGeometry.parameters.height) / 2) + 2 + (j * 5);
@@ -80,6 +78,10 @@
                     scene.add(cube);
                 }
             }
+
+            var lookAtGeom = new THREE.SphereGeometry(2);
+            var lookAtMesh = new THREE.Mesh(lookAtGeom, new THREE.MeshLambertMaterial({color: 0xff0000}));
+            scene.add(lookAtMesh);
 
             var directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
             directionalLight.position.set(-20, 40, 60);
@@ -123,11 +125,18 @@
 
             // make sure that for the first time, the
             // camera is looking at the scene
-            camera.lookAt(scene.position);
             render();
+
+            var step = 0;
 
             function render() {
                 stats.update();
+                step += 0.02;
+                if (camera instanceof THREE.Camera) {
+                    var z = 10 + (100 * (Math.sin(step)));
+                    camera.lookAt(new THREE.Vector3(0, 10, z));
+                    lookAtMesh.position.copy(new THREE.Vector3(0, 10, z));
+                }
 
                 // render using requestAnimationFrame
                 requestAnimationFrame(render);
